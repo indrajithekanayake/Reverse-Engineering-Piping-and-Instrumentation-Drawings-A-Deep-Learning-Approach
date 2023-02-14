@@ -1,4 +1,4 @@
-To install this application follow the steps.
+### To install this application follow the steps.
 1. You will need python installed in your system
     - Make sure you create your virtual environement before installing dependeiences for this application.
     - To create virtual environement you can use Conda or virtualenv whichever you prefer.
@@ -25,3 +25,15 @@ To install this application follow the steps.
     ```
 
 4. After starting the server you should be able to access **127.0.0.1:5000** where your application will be running.
+
+### References
+This study use the dataset created by [@heyad](https://github.com/heyad/Eng_Diagrams). 
+
+- If you use the dataset in this repository, please cite as follows:
+
+E. Elyan, C.G. Moreno and P. Johnston, “Symbols in Engineering Drawings (SiED): An Imbalanced Dataset Benchmarked by Convolutional Neural Networks”, In 2020 International Joint Conference of the 21st EANN (Engineering Applications of Neural Networks), EANN 2020. Proceedings of the International Neural Networks Society, vol 2. Springer, Cham, DOI https://doi.org/10.1007/978-3-030-48791-1_16
+
+- If you use the provided model or this web application, please cite as follows:
+
+### Comments / Questions
+You can reach me on [linkedin](https://www.linkedin.com/in/indrajithek)
