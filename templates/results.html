@@ -1,0 +1,259 @@
+{% extends 'index.html' %} {% block content %} {% if rezied_filename %}
+<div class="container mx-auto">
+  <!-- Button for zoom in and zoom out as well as reset panzoom layout-->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="btn-group" role="group" aria-label="Basic example">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          id="zoomInButton"
+          style="z-index: 1"
+        >
+          <i class="fas fa-search-plus"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          id="zoomOutButton"
+          style="z-index: 1"
+        >
+          <i class="fas fa-search-minus"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-info"
+          id="resetButton"
+          style="z-index: 1"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="panzoom">
+    <!-- Iframe which hold our image -->
+    <iframe
+      class="container mx-auto"
+      height="600"
+      frameborder="0"
+      allowfullscreen
+      id="main-frame"
+    ></iframe>
+  </div>
+  <!-- Using Jquery plugin named panzoom to zoom into our image -->
+  <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom/dist/panzoom.min.js"></script>
+  <script>
+    const element = document.getElementById("panzoom");
+    const panzoom = Panzoom(element, {
+      canvas: false,
+      maxScale: 2,
+      contain: "invert",
+      zoom: true,
+      smoothScroll: true,
+      smoothScrollDuration: 500,
+      smoothScrollSpeed: 500,
+      onPan: function (e) {
+        console.log(e);
+      },
+    });
+    // Function to zoomIn binded to zoomIn button
+    document
+      .getElementById("zoomInButton")
+      .addEventListener("click", function () {
+        panzoom.zoomIn();
+      });
+
+    // Function to zoomOut binded to zoomOut Button
+    document
+      .getElementById("zoomOutButton")
+      .addEventListener("click", function () {
+        panzoom.zoomOut();
+      });
+
+    // Function to reset the panzoom
+    document
+      .getElementById("resetButton")
+      .addEventListener("click", function () {
+        panzoom.reset();
+      });
+  </script>
+</div>
+<script>
+  // Setting the syles for our iframe
+  var frame = document.getElementById("main-frame");
+  const iWindow = frame.contentWindow;
+  const iDocument = iWindow.document;
+  iDocument.body.style.backgroundColor = "#ffffff";
+  //   iDocument.body.style.overflow = "hidden";
+  // Horizonatal align content in center
+  iDocument.body.style.margin = "0";
+  iDocument.body.style.padding = "0";
+  iDocument.body.style.textAlign = "center";
+  iDocument.body.style.verticalAlign = "middle";
+
+  // Creating canvas in which we will draw our rectange
+  const canvas_create = document.createElement("canvas");
+  canvas_create.id = "canvas";
+  canvas_create.width = iWindow.innerWidth;
+  canvas_create.height = iWindow.innerHeight;
+  iDocument.body.appendChild(canvas_create);
+
+  // Drawing Rectangle on canvas
+  var canvas = iDocument.getElementById("canvas");
+  var ctx = canvas.getContext("2d");
+  // rect object which stores all our data regrading co ordinate for rectangle which is drawn
+  var rect = {};
+  var drag = false;
+  var imageObj = null;
+
+  // Init function is called and we drawing our uploaded image
+  function init() {
+    imageObj = new Image();
+    imageObj.onload = function () {
+      //   ctx.drawImage(image, 0, 0, imageObj.width, imageObj.height);
+      createImageBitmap(imageObj, {
+        resizeQuality: "high",
+      }).then(function (imageBitmap) {
+        ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height);
+      });
+    };
+    // Dynamically updating image
+    imageObj.src =
+      "{{ url_for('static', filename='uploads/' + rezied_filename) }}";
+    canvas.addEventListener("mousedown", mouseDown, false);
+    canvas.addEventListener("mouseup", mouseUp, false);
+    canvas.addEventListener("mousemove", mouseMove, false);
+  }
+
+  // Function when mouse is clicked for drawing
+  function mouseDown(e) {
+    rect.startX = e.pageX - this.offsetLeft;
+    rect.startY = e.pageY - this.offsetTop;
+    drag = true;
+  }
+
+  // Function when drawing is done
+  function mouseUp() {
+    drag = false;
+  }
+
+  // Drag function for creating rectangle.
+  function mouseMove(e) {
+    if (drag) {
+      ctx.clearRect(0, 0, imageObj.width, imageObj.height);
+      ctx.drawImage(imageObj, 0, 0);
+      rect.w = e.pageX - this.offsetLeft - rect.startX;
+      rect.h = e.pageY - this.offsetTop - rect.startY;
+      // Change the styling of rectangle over here
+      ctx.strokeStyle = "red";
+      ctx.lineWidth = "2";
+      ctx.strokeRect(rect.startX, rect.startY, rect.w, rect.h);
+    }
+  }
+
+  // Function which sent post request to predict image route
+  function predictSelectedImage(x, y, w, h) {
+    const api_url = "{{ url_for('predict_image') }}";
+    // Creating new canvas of given image with x,y,w,h co-ordinates
+    const new_canvas = document.createElement("canvas");
+    new_canvas.width = w;
+    new_canvas.height = h;
+    const new_ctx = new_canvas.getContext("2d");
+    // Drawing the selected region into new canvas
+    new_ctx.drawImage(imageObj, x, y, w, h, 0, 0, w, h);
+    // Converting this region to data url - base64
+    const new_image = new_canvas.toDataURL("image/jpeg");
+    // Send new image to predict endpoint
+    const formData = new FormData();
+    formData.append("image_to_predict", new_image);
+    fetch(api_url, {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Create an alert success and show it to the user
+        const alert = document.createElement("div");
+        alert.className =
+          "container alert alert-success alert-dismissible fade show mt-2";
+        alert.innerHTML =
+          "<strong>Success!</strong> Result is " +
+          data.result +
+          " with probability " +
+          data.probability +
+          "%";
+        // Append child before predict button
+        document
+          .getElementById("predict_button")
+          .parentNode.insertBefore(
+            alert,
+            document.getElementById("predict_button")
+          );
+      })
+      .catch((error) => {
+        console.log(error);
+        const alert = document.createElement("div");
+        alert.className =
+          "container alert alert-danger alert-dismissible fade show";
+        alert.innerHTML = "Something Went Wrong! Please Try Again Later";
+        // Append child before predict button
+        document
+          .getElementById("predict_button")
+          .parentNode.insertBefore(
+            alert,
+            document.getElementById("predict_button")
+          );
+      });
+  }
+
+  init();
+  // Helper function while drawing rectangle
+  function clearAllRect() {
+    ctx.clearRect(0, 0, imageObj.width, imageObj.height);
+    ctx.drawImage(imageObj, 0, 0);
+  }
+</script>
+{% endif %}
+<div class="container">
+  <div class="btn btn-outline-primary mb-3 w-100 p-3 mt-3" id="predict_button">
+    Predict
+  </div>
+  <div class="btn btn-outline-secondary mb-3 w-100 p-3 mt-3" id="ocr_button">
+    Download OCR pdf
+  </div>
+  <div class="btn btn-outline-primary mb-3 w-100 p-3" id="clear_button">
+    Clear
+  </div>
+  <div class="text-bg-dark mb-3">Your result will be shown here:</div>
+</div>
+
+<script>
+  // When clicked on predict button send post request using predictSelectedImage function
+  document
+    .getElementById("predict_button")
+    .addEventListener("click", function () {
+      predictSelectedImage(rect.startX, rect.startY, rect.w, rect.h);
+    });
+
+  // Clear function to clear the exisiting rectangle
+  document
+    .getElementById("clear_button")
+    .addEventListener("click", function () {
+      clearAllRect();
+      // Remove the alert if it is present
+      const alert = document.getElementsByClassName("alert")[0];
+      if (alert) {
+        alert.remove();
+      }
+    });
+
+  document.getElementById("ocr_button").addEventListener("click", function () {
+    // Download the pdf file
+    var pdfFile = "{{ url_for('static', filename='pdf/' + pdf_file) }}";
+    var pdfWindow = window.open(pdfFile, "_blank");
+    pdfWindow.focus();
+  });
+</script>
+
+{% endblock %}
