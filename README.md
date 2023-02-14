@@ -39,5 +39,7 @@ E. Elyan, C.G. Moreno and P. Johnston, “Symbols in Engineering Drawings (SiED)
 
 - If you use the provided model or this web application, please cite as follows:
 
+*citation pending*
+
 ### Comments / Questions
 You can reach me on [linkedin](https://www.linkedin.com/in/indrajithek)
