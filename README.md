@@ -26,6 +26,10 @@
 
 4. After starting the server you should be able to access **127.0.0.1:5000** where your application will be running.
 
+<div align="center">
+<img title="Web Interface" src="/images/Screenshot.png" width="600" height="300">
+</div>
+
 ### References
 This study use the dataset created by [@heyad](https://github.com/heyad/Eng_Diagrams). 
 
