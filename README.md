@@ -37,9 +37,9 @@ This study use the dataset created by [@heyad](https://github.com/heyad/Eng_Diag
 
 E. Elyan, C.G. Moreno and P. Johnston, “Symbols in Engineering Drawings (SiED): An Imbalanced Dataset Benchmarked by Convolutional Neural Networks”, In 2020 International Joint Conference of the 21st EANN (Engineering Applications of Neural Networks), EANN 2020. Proceedings of the International Neural Networks Society, vol 2. Springer, Cham, DOI https://doi.org/10.1007/978-3-030-48791-1_16
 
-- If you use the provided model or this web application, please cite as follows:
+- If you use/ refer the provided model or this web application, please cite as follows:
 
-*citation pending*
+I. Ekanayake, J. Warnakula and S. Viswakula, "Reverse Engineering Piping and Instrumentation Drawings: A Deep Learning Approach," 2023 International Conference on Power, Instrumentation, Control and Computing (PICC), Thrissur, India, 2023, pp. 1-4, doi: 10.1109/PICC57976.2023.10142454.
 
 ### Comments / Questions
 You can reach me on [linkedin](https://www.linkedin.com/in/indrajithek)
